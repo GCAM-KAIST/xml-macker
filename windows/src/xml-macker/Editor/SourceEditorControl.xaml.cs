@@ -1083,7 +1083,18 @@ public partial class SourceEditorControl : UserControl, ISourceEditor
         int docLen = buf.Length;
         if (contentStart > docLen) return null;
 
-        int cap = Math.Min(4 * 1024 * 1024, docLen - contentStart);
+        // The window is the element's own extent, not a flat slice of the document. Copying up to four
+        // megabytes per element turned selecting a row with many children into gigabytes of copying on
+        // the interface thread, and a document can decide how many children a row has.
+        int cap = docLen - contentStart;
+        int[] starts = _editor.CurrentLineStarts;
+        int endLine = node.EndLine;                       // 1-based line of the closing tag
+        if (endLine > 0 && endLine <= starts.Length)
+        {
+            int endOffset = endLine < starts.Length ? starts[endLine] : docLen;
+            if (endOffset > contentStart) cap = Math.Min(cap, endOffset - contentStart);
+        }
+        cap = Math.Min(cap, 4 * 1024 * 1024);
         if (cap <= 0) return null;
         string window = buf.Substring(contentStart, cap);
 

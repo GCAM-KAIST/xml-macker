@@ -82,7 +82,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         LegacyDefaults.migrateIfNeeded()
-        Diag.log("app launched, args=\(CommandLine.arguments)")
+        // Count, not paths: the names of the files someone opens are
+        // theirs, and a log outlives the session.
+        Diag.log("app launched, \(max(0, CommandLine.arguments.count - 1)) argument(s)")
         // Application-wide appearance follows the saved theme so that
         // even Open/Save panels pick the matching light/dark chrome.
         // Deliberately NOT set: NSApp.appearance drags the macOS menu bar

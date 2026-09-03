@@ -1144,7 +1144,9 @@ final class SourceViewController: NSViewController {
         }
         guard let storage = textStorageRef else { return }
         let tagText = storage.mutableString.substring(with: tagRange)
-        Diag.log("refreshAttributes: node=\(node.name) tagRange=\(tagRange) text=\"\(tagText.replacingOccurrences(of: "\n", with: "\\n"))\"")
+        // The tag's own text is deliberately not logged: a log is a file
+        // on disk, and the document belongs to whoever opened it.
+        Diag.log("refreshAttributes: node=\(node.name) tagRange=\(tagRange) length=\(tagText.count)")
 
         // Pick up the tag NAME too, the first identifier after `<`.
         // Without this, renaming <Non-CO2> to <Non-sdf> in the source

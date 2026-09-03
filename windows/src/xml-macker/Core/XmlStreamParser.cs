@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
 
 namespace XMLMacker.Core;
@@ -31,8 +32,15 @@ public sealed class XmlStreamParser
     /// <summary>Max total nodes. Effectively unbounded by default.</summary>
     public int HardNodeCap = int.MaxValue;
 
+    /// <summary>Most attributes recorded for one element. A DOCTYPE can declare hundreds of defaulted attributes that the reader then reports on every element.</summary>
+    private const int MaxAttributesPerElement = 256;
+
+    /// <summary>Most text collected for one element (4 MB). Nothing on screen shows more, and it stops one element's text growing without limit.</summary>
+    private const int TextValueCap = 4 * 1024 * 1024;
+
     // ---- Internal state ----------------------------------------------------------------------------------------
 
+    private readonly Dictionary<XmlTreeNode, StringBuilder> _pendingText = new();   // text gathered per open element
     private int _nextId;                                   // monotonically increasing node id; also the element node count
     private readonly bool _buildsTree;
     private readonly XmlTreeNode _document;                // the sentinel root, created at init
@@ -132,6 +140,9 @@ public sealed class XmlStreamParser
         // Security: never fetch external DTD/entities.
         DtdProcessing = DtdProcessing.Parse,
         XmlResolver = null,
+        // A few hundred bytes of nested entity definitions expand into gigabytes and take the app down.
+        // Real documents never come close to ten million characters of entity text.
+        MaxCharactersFromEntities = 10_000_000,
         // The Swift XMLParser tolerates any character; matching that leniency.
         CheckCharacters = false,
         // Deliver PIs/comments (no tree nodes are built for them, matching the Swift delegate).
@@ -203,6 +214,7 @@ public sealed class XmlStreamParser
 
         if (lineInfo is not null)
             _currentLineNumber = Math.Max(_currentLineNumber, lineInfo.LineNumber);
+        FlushAllText();
         return new ParseResult(_document, _errors.ToList(), _nextId);
     }
 
@@ -250,16 +262,22 @@ public sealed class XmlStreamParser
 
         if (reader.HasAttributes)
         {
-            var attrs = new List<(string Name, string Value)>(reader.AttributeCount);
-            for (int a = 0; a < reader.AttributeCount; a++)
+            // Two guards. Attributes the document did not write, invented for every element by a
+            // DOCTYPE default, are skipped: a few hundred such declarations otherwise attach hundreds of
+            // pairs to every element in the file and a small file allocates gigabytes. And the list is
+            // bounded, because nothing displays more attributes than this.
+            int total = reader.AttributeCount;
+            var attrs = new List<(string Name, string Value)>(Math.Min(total, MaxAttributesPerElement));
+            for (int a = 0; a < total && attrs.Count < MaxAttributesPerElement; a++)
             {
                 reader.MoveToAttribute(a);
+                if (reader.IsDefault) continue;
                 attrs.Add((reader.Name, reader.Value));
             }
             reader.MoveToElement();
             // Alphabetical (ascending, ordinal) by attribute name at build time, so display order matches.
             attrs.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
-            node.Attributes = attrs;
+            if (attrs.Count > 0) node.Attributes = attrs;
         }
 
         node.StartLine = lineNo;
@@ -284,6 +302,7 @@ public sealed class XmlStreamParser
         if (top != null)
         {
             top.EndLine = lineInfo?.LineNumber ?? top.EndLine;
+            FlushText(top);
             top.TextValue = top.TextValue.Trim();
         }
     }
@@ -297,7 +316,32 @@ public sealed class XmlStreamParser
         XmlTreeNode? parent = CurrentParent();
         if (parent == null) return;
 
-        parent.TextValue += value;
+        // Collected in a builder, not by string addition. A comment, a processing instruction or a CDATA
+        // section splits the text of one element into separate runs, and adding each run to the string
+        // copies everything gathered so far: a few megabytes of such runs would copy billions of
+        // characters. The cap stops one element's text growing without limit; nothing on screen shows
+        // anywhere near this much.
+        if (!_pendingText.TryGetValue(parent, out StringBuilder? builder))
+        {
+            builder = new StringBuilder(parent.TextValue);
+            _pendingText[parent] = builder;
+        }
+        if (builder.Length >= TextValueCap) return;
+        builder.Append(value);
+    }
+
+    /// <summary>Moves the collected text of <paramref name="node"/> onto the node itself.</summary>
+    private void FlushText(XmlTreeNode node)
+    {
+        if (_pendingText.Remove(node, out StringBuilder? builder)) node.TextValue = builder.ToString();
+    }
+
+    /// <summary>Moves whatever is still collected onto its nodes (a document that ends unclosed).</summary>
+    private void FlushAllText()
+    {
+        foreach ((XmlTreeNode node, StringBuilder builder) in _pendingText)
+            node.TextValue = builder.ToString().Trim();
+        _pendingText.Clear();
     }
 
     // ---- currentParent -----------------------------------------------------------------------------------------

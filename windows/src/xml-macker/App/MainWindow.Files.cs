@@ -728,8 +728,19 @@ public partial class MainWindow
         string dir = Path.GetDirectoryName(url) ?? ".";
         string tmp = Path.Combine(dir, Path.GetFileName(url) + ".xmtmp");
         File.WriteAllBytes(tmp, bytes);
-        if (File.Exists(url)) File.Replace(tmp, url, null);
-        else File.Move(tmp, url);
+        try
+        {
+            if (File.Exists(url)) File.Replace(tmp, url, null);
+            else File.Move(tmp, url);
+        }
+        catch
+        {
+            // The replace did not happen (a lock, a sync client, a full disk). Remove the copy: it is
+            // the whole document, under a name nobody recognises, sitting next to the original.
+            try { if (File.Exists(tmp)) File.Delete(tmp); }
+            catch { /* if even that fails there is nothing further to do */ }
+            throw;
+        }
     }
 
     private static DateTime? FileModificationDateUtc(string path)

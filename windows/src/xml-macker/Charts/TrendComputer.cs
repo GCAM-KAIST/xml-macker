@@ -358,6 +358,24 @@ public static class TrendComputer
 
         if (values.Count < 2) return null;
 
+        // Sample when there are more points than the view can distinguish, exactly as the generic engine
+        // does below. Without it a document with a million repeated elements makes every repaint build a
+        // million text labels.
+        if (values.Count > StrideCap)
+        {
+            int n = values.Count;
+            double step = n / (double)StrideCap;
+            var sampledLabels = new List<string>();
+            var sampledValues = new List<double>();
+            for (double i = 0; i < n; i += step)
+            {
+                int idx = (int)i;
+                if (idx < n) { sampledLabels.Add(labels[idx]); sampledValues.Add(values[idx]); }
+            }
+            labels = sampledLabels;
+            values = sampledValues;
+        }
+
         // Time series with all-integer labels → sort ascending by integer label (chronological).
         if (kind == TrendKind.Line && labels.All(l => int.TryParse(l, NumberStyles.Integer, Inv, out _)))
         {

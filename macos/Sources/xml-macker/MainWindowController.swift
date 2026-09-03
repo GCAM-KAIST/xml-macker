@@ -1869,7 +1869,7 @@ final class MainWindowController: NSWindowController, NSWindowDelegate, NSSplitV
     static var scratchFolder: URL {
         let base = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        let dir = base.appendingPathComponent("com.ahmed.xmleditorx/untitled", isDirectory: true)
+        let dir = base.appendingPathComponent("\(Bundle.main.bundleIdentifier ?? "com.ahmed.xmlmacker")/untitled", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }
@@ -4920,7 +4920,7 @@ extension MainWindowController {
                 : "Select some text in the source first"
             return
         }
-        runPrint(text, jobTitle: "Selection, \(currentFileURL?.lastPathComponent ?? "XMLMacker")")
+        runPrint(text, jobTitle: "Selection, \(currentFileURL?.lastPathComponent ?? (Bundle.main.infoDictionary?["CFBundleName"] as? String ?? "xml-macker"))")
     }
 
     @objc func sharePrintCurrentElement(_ sender: Any?) {
@@ -5024,7 +5024,7 @@ extension MainWindowController {
     /// Chat providers have independent, changing input limits. For a large
     /// selection we make both choices honest: a bounded compatibility excerpt,
     /// or the entire uncapped selection with a warning that the destination may
-    /// reject it. XMLMacker never truncates without the user's confirmation.
+    /// reject it. xml-macker never truncates without the user's confirmation.
     private func shareXMLText(
         _ xml: String,
         promptIntroduction: String,

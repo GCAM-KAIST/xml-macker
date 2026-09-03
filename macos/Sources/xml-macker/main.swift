@@ -37,7 +37,7 @@ NSSetUncaughtExceptionHandler { exception in
         let a = NSAlert()
         a.alertStyle = .warning
         a.messageText = "Something went wrong"
-        a.informativeText = "\(reason)\n\nThe app is still running. The details were written to /tmp/xmleditorx.log."
+        a.informativeText = "\(reason)\n\nThe app is still running. The details were written to \(Diag.displayPath)."
         a.runModal()
     }
 }

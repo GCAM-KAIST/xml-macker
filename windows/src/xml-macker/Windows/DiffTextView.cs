@@ -17,7 +17,7 @@ namespace XMLMacker.Windows;
 /// and vertical scrollers, and exposes a pixel <see cref="VerticalOffset"/> for mirrored scrolling
 /// (aligned rows have identical heights on both sides, so offsets mirror 1:1).
 /// This is a purpose-built control rather than <c>SourceEditorControl</c> because
-/// <see cref="xml-macker.Editor.ISourceEditor"/> exposes neither arbitrary per-range background
+/// <see cref="XMLMacker.Editor.ISourceEditor"/> exposes neither arbitrary per-range background
 /// bands nor a scroll-offset change signal, both of which the row model requires.
 /// </summary>
 public sealed class DiffTextView : Grid

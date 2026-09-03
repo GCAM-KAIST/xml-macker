@@ -42,7 +42,7 @@ public partial class App : Application
         // Without these three handlers a single stray exception anywhere in the UI terminates the
         // whole editor with the bare Windows "has stopped working" box and no managed message, which
         // is exactly how the minimap-magnifier crash was able to destroy unsaved work silently.
-        // Log everything (Diag writes to %TEMP%\xmleditorx.log and swallows its own failures), explain it
+        // Log everything (Diag writes to %TEMP%\xml-macker.log and swallows its own failures), explain it
         // in plain words on screen, and keep the editor alive so the document can still be saved.
         DispatcherUnhandledException += (_, args) =>
         {

@@ -7,13 +7,13 @@ namespace XMLMacker.Shared;
 /// replacement for macOS <c>setFrameAutosaveName</c>. Persisted into <see cref="AppSettings"/>
 /// under <c>&lt;key&gt;.Left/.Top/.Width/.Height</c>.
 ///
-/// Keys per spec, e.g. main window, per-pane pop-outs (<c>XMLMackerPopout-&lt;title&gt;</c>),
+/// Keys per spec, e.g. main window, per-pane pop-outs (<c>xml-mackerPopout-&lt;title&gt;</c>),
 /// diff/orbit/find/validation. Restore applies an off-screen guard so a window saved on a
 /// now-disconnected monitor is clamped back into the virtual screen.
 /// </summary>
 public static class WindowPlacement
 {
-    /// <summary>Composes the per-pane pop-out key used by the spec (<c>XMLMackerPopout-&lt;title&gt;</c>).</summary>
+    /// <summary>Composes the per-pane pop-out key used by the spec (<c>xml-mackerPopout-&lt;title&gt;</c>).</summary>
     public static string PopoutKey(string title) => "xml-mackerPopout-" + title;
 
     /// <summary>Saves the window's bounds under <paramref name="key"/>. Uses restore bounds when maximized/minimized.</summary>

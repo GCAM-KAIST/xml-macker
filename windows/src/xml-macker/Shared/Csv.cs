@@ -17,6 +17,10 @@ public static class Csv
     public static string Escape(string? s)
     {
         s ??= string.Empty;
+        // A spreadsheet treats a cell starting with = + - @ (or a tab) as a formula, and the text in these
+        // cells comes from the opened document. An apostrophe in front makes the spreadsheet keep it as
+        // text, which is what a search result is.
+        if (s.Length > 0 && "=+-@\t\r".IndexOf(s[0]) >= 0) s = "'" + s;
         bool mustQuote = s.IndexOf(',') >= 0
                       || s.IndexOf('"') >= 0
                       || s.IndexOf('\n') >= 0

@@ -33,7 +33,10 @@ public static class HighlightStore
         public string Color { get; set; } = "";
         public string Text { get; set; } = ""; // the covered text (first 200 characters)
     }
-    private sealed class Doc { public string Path { get; set; } = ""; public List<Mark> Marks { get; set; } = new(); }
+    // No document path is stored: the file name is already the hash of the path, and writing the
+    // path in plain text made the file more revealing than it needs to be. Older files that still
+    // carry one load unchanged, the field is simply ignored.
+    private sealed class Doc { public List<Mark> Marks { get; set; } = new(); }
 
     private static string Folder => Path.Combine(AppSettings.Instance.StorageDirectory, "highlights");
 
@@ -108,7 +111,7 @@ public static class HighlightStore
                 if (File.Exists(file)) File.Delete(file);
                 return;
             }
-            var doc = new Doc { Path = path };
+            var doc = new Doc();
             foreach (HighlightRange r in highlights.All)
             {
                 int line = LineFor(lineStarts, r.Start);

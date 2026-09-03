@@ -69,7 +69,7 @@ final class PanePopoutWindowController: NSWindowController, NSWindowDelegate {
 
     /// Show the window. When `parent` is given (and the user has not
     /// asked for floating pop-outs), the window becomes a child of the
-    /// main window: it stays above XMLMacker but never above another
+    /// main window: it stays above xml-macker but never above another
     /// application. A plain .normal window would instead disappear
     /// behind the full-screen main window as soon as it was clicked.
     func show(attachedTo parent: NSWindow? = nil) {

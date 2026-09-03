@@ -114,7 +114,7 @@ struct Theme: Equatable {
 
 extension Theme {
 
-    // ─── Aurora Dark (original XMLMacker palette) ───
+    // ─── Aurora Dark (the palette the app shipped with) ───
     static let auroraDark = Theme(
         id: "aurora-dark",
         displayName: "Aurora Dark",

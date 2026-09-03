@@ -5,7 +5,7 @@ namespace XMLMacker.Shared;
 
 /// <summary>
 /// The self-managed "Open Recent" list, the WPF port of AppDelegate's hand-rolled recents.
-/// Most-recent-first, capped at 10, persisted to <c>XMLMacker.recentFiles</c> in <see cref="AppSettings"/>.
+/// Most-recent-first, capped at 10, persisted to <c>xml-macker.recentFiles</c> in <see cref="AppSettings"/>.
 ///
 /// Rationale (from AppDelegate.swift): the system recent-documents mechanism is unreliable for
 /// non-document apps, so the app keeps its own list.

@@ -20,8 +20,10 @@ public partial class MainWindow
 {
     private const string BlankDocument = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n    \n</root>\n";
 
+    // LOCAL application data: this folder holds whole documents that were never saved. In the roaming
+    // profile they would be copied to a file server at logoff and onto every machine the account uses.
     private static string ScratchFolder => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "xml-macker", "Untitled");
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "xml-macker", "Untitled");
 
     /// <summary>True for a document that lives in the scratch folder (never saved to disk yet).</summary>
     private static bool IsUntitled(string? url)

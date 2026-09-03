@@ -898,11 +898,18 @@ public static class XmlFragmentLinter
     /// Decides recovery on a mismatched closing tag. A typo'd close still CLOSES its element (pop + one clean error); an
     /// unrelated name is treated as a stray close (don't pop, so the real close can still match). Both names lowercased.
     /// </summary>
+    /// <summary>Longest tag name still worth comparing for a "did you mean" suggestion.</summary>
+    private const int MaxTypoNameLength = 64;
+
     private static bool LooksLikeTypo(string close, string open)
     {
         string a = close.ToLowerInvariant();
         string b = open.ToLowerInvariant();
         if (a == b) return true;
+        // The distance check below compares every character of one name against every character of the
+        // other. A tag name is a word; a document can make one a million characters long, and then that
+        // comparison runs for hours. A suggestion only means anything for short names anyway.
+        if (a.Length > MaxTypoNameLength || b.Length > MaxTypoNameLength) return false;
         int aCharacters = System.Globalization.StringInfo.ParseCombiningCharacters(a).Length;
         int bCharacters = System.Globalization.StringInfo.ParseCombiningCharacters(b).Length;
         return Math.Min(aCharacters, bCharacters) >= 4 && EditDistanceAtMost2(a, b);

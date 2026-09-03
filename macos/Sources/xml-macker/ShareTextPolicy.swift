@@ -3,7 +3,7 @@ import Foundation
 /// A provider-neutral policy for moving source text into another app.
 ///
 /// Chat web sites and macOS sharing extensions do not expose one common input
-/// limit. XMLMacker therefore offers a conservative excerpt for predictable
+/// limit. xml-macker therefore offers a conservative excerpt for predictable
 /// sharing, while leaving the full selection available as an explicit copy.
 /// Excerpts always end between Swift `Character`s, so an extended grapheme
 /// cluster (for example an emoji family or a letter plus combining marks) is

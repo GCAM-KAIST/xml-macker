@@ -18,8 +18,11 @@ public sealed class RangeObservableCollection<T> : ObservableCollection<T>
     {
         if (items.Count == 0) return;
         CheckReentrancy();
-        for (int i = 0; i < items.Count; i++)
-            Items.Insert(index + i, items[i]);
+        // One block move. Inserting one at a time shifts every row below the insertion point once per
+        // child, so expanding an element with many children costs children x rows-below moves: measured
+        // at half a minute for 300,000 children, against milliseconds for the single move.
+        if (Items is List<T> backing) backing.InsertRange(index, items);
+        else for (int i = 0; i < items.Count; i++) Items.Insert(index + i, items[i]);
         RaiseReset();
     }
 
@@ -28,8 +31,8 @@ public sealed class RangeObservableCollection<T> : ObservableCollection<T>
     {
         if (count <= 0) return;
         CheckReentrancy();
-        for (int i = 0; i < count; i++)
-            Items.RemoveAt(index);
+        if (Items is List<T> backing) backing.RemoveRange(index, count);
+        else for (int i = 0; i < count; i++) Items.RemoveAt(index);
         RaiseReset();
     }
 

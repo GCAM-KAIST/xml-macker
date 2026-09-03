@@ -17,9 +17,12 @@ namespace XMLMacker.Shared;
 /// </summary>
 public sealed class SingleInstance : IDisposable
 {
-    private const string MutexName = "xml-macker-SingleInstance";
+    // "Local\" scopes the mutex to this logon session, so another account on the same machine
+    // cannot hold it and keep the app from starting.
+    private const string MutexName = @"Local\xml-macker-SingleInstance";
     private const string PipeName = "xml-macker-SingleInstance-Pipe";
     private const int ConnectTimeoutMs = 1500;
+    private const int MaxConsecutiveFailures = 20;
 
     private readonly Mutex _mutex;
     private readonly CancellationTokenSource _cts = new();
@@ -50,13 +53,18 @@ public sealed class SingleInstance : IDisposable
 
     private async Task ServerLoop(CancellationToken token)
     {
+        int failures = 0;
         while (!token.IsCancellationRequested)
         {
             try
             {
+                // CurrentUserOnly puts an ACL on the pipe that admits this account only. Without it
+                // another local account can create the same pipe name first and receive the path of
+                // the file being opened.
                 using var server = new NamedPipeServerStream(
                     PipeName, PipeDirection.In, 1,
-                    PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+                    PipeTransmissionMode.Byte,
+                    PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
 
                 await server.WaitForConnectionAsync(token).ConfigureAwait(false);
 
@@ -71,8 +79,16 @@ public sealed class SingleInstance : IDisposable
             }
             catch
             {
-                // Ignore a broken connection and keep listening.
+                // A broken connection is ordinary and the loop simply listens again. A pipe that cannot
+                // be created at all is not: another account may hold the name, and retrying without a
+                // pause would spin a processor core for as long as the app is open. Back off, and give up
+                // on forwarding after a while rather than burning the machine.
+                if (++failures > MaxConsecutiveFailures) break;
+                try { await Task.Delay(Math.Min(500 * failures, 5000), token).ConfigureAwait(false); }
+                catch (OperationCanceledException) { break; }
+                continue;
             }
+            failures = 0;
         }
     }
 
@@ -83,7 +99,10 @@ public sealed class SingleInstance : IDisposable
     {
         try
         {
-            using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
+            // The same flag on this end verifies the server is owned by this account before a path
+            // is handed over, so the file name cannot be delivered to somebody else's process.
+            using var client = new NamedPipeClientStream(
+                ".", PipeName, PipeDirection.Out, PipeOptions.CurrentUserOnly);
             client.Connect(ConnectTimeoutMs);
             using var writer = new StreamWriter(client, new UTF8Encoding(false));
             writer.Write(path ?? string.Empty);

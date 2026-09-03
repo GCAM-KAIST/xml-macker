@@ -13,6 +13,10 @@ AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
+; An upgrade from the old name would otherwise keep the old Start-menu folder, so the menu would show
+; a group called XMLEDITORX containing xml-macker. The install DIRECTORY is deliberately left alone:
+; reusing it keeps a folder the user may have chosen by hand.
+UsePreviousGroup=no
 UninstallDisplayIcon={app}\{#MyAppExeName}
 SetupIconFile=..\src\xml-macker\Resources\xml-macker.ico
 OutputDir=Output
@@ -28,6 +32,18 @@ PrivilegesRequiredOverridesAllowed=dialog
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Shortcuts:"
 Name: "openwith"; Description: "Show xml-macker in the ""Open with"" list for .xml files"; GroupDescription: "File types:"; Flags: unchecked
+
+; The AppId is deliberately unchanged: this is the same product under a
+; new name, so an existing installation is upgraded in place and the
+; user keeps their folder and their choices. Inno does not remove the
+; files and shortcuts that carried the old name, so they go here.
+[InstallDelete]
+Type: files; Name: "{app}\XMLEDITORX.exe"
+Type: files; Name: "{group}\XMLEDITORX.lnk"
+Type: files; Name: "{group}\Uninstall XMLEDITORX.lnk"
+Type: files; Name: "{autodesktop}\XMLEDITORX.lnk"
+; and the old Start-menu folder itself, which is otherwise left behind empty
+Type: filesandordirs; Name: "{autoprograms}\XMLEDITORX"
 
 [Files]
 Source: "..\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion

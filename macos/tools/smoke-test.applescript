@@ -2,7 +2,7 @@
 -- reports whether it survived. Used by tools/check.sh; the app must
 -- already be running with at least one file open.
 on run
-	set appName to "XMLMacker"
+	set appName to "xml-macker"
 	set report to {}
 
 	tell application appName to activate

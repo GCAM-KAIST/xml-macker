@@ -63,6 +63,7 @@ enum SelfCheck {
         checkThemes()
         checkQuickChart()
         checkElementDrag()
+        checkRenameMigration()
 
         let elapsed = String(format: "%.2f", Date().timeIntervalSince(started))
         print("\n\(passes) passed, \(failures.count) failed, \(elapsed)s")
@@ -97,6 +98,77 @@ enum SelfCheck {
         print("kind:   \(series.kind)")
         print("labels: \(series.xLabels.prefix(8).joined(separator: ", "))\(series.xLabels.count > 8 ? ", … (\(series.xLabels.count) in all)" : "")")
         return 0
+    }
+
+    // MARK: what a rename carries across
+
+    /// The app has been renamed four times, and each rename moves the
+    /// folders it owns: the marker's saved strokes and the Learn pane's
+    /// logins. Losing either is silent, so the carrying is checked here.
+    private static func checkRenameMigration() {
+        section("Rename migration")
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory
+            .appendingPathComponent("xml-macker-migration-check-\(UUID().uuidString)")
+        defer { try? fm.removeItem(at: root) }
+
+        // A store is a TREE, not a flat folder: a browser profile keeps
+        // its cookies several folders down. Carrying only the loose files
+        // at the top would take the marks and silently drop the logins.
+        let old = root.appendingPathComponent("OLDNAME/profile", isDirectory: true)
+        let deep = old.appendingPathComponent("Default/Cookies", isDirectory: true)
+        let new = root.appendingPathComponent("xml-macker/profile", isDirectory: true)
+        try? fm.createDirectory(at: deep, withIntermediateDirectories: true)
+        try? "top".write(to: old.appendingPathComponent("top.txt"), atomically: true, encoding: .utf8)
+        try? "session=abc".write(to: deep.appendingPathComponent("cookies.db"),
+                                 atomically: true, encoding: .utf8)
+
+        equal("a whole tree is carried, not just its top level",
+              LegacyDefaults.carry(old, new), .done)
+        let login = new.appendingPathComponent("Default/Cookies/cookies.db")
+        check("the file several folders down arrived", fm.fileExists(atPath: login.path))
+        equal("with its contents intact",
+              (try? String(contentsOf: login, encoding: .utf8)) ?? "", "session=abc")
+        check("the original is left alone, so an older build still works",
+              fm.fileExists(atPath: deep.appendingPathComponent("cookies.db").path))
+        check("nothing is left staged",
+              !fm.fileExists(atPath: new.path + ".incoming"))
+        equal("running it again changes nothing", LegacyDefaults.carry(old, new), .nothing)
+
+        // A store creates its folder the first time it is touched, which
+        // can happen before this runs.
+        let old2 = root.appendingPathComponent("OLDNAME/other", isDirectory: true)
+        let new2 = root.appendingPathComponent("xml-macker/other", isDirectory: true)
+        try? fm.createDirectory(at: old2, withIntermediateDirectories: true)
+        try? fm.createDirectory(at: new2, withIntermediateDirectories: true)
+        try? "x".write(to: old2.appendingPathComponent("m.json"), atomically: true, encoding: .utf8)
+        equal("an empty folder at the destination does not block the carry",
+              LegacyDefaults.carry(old2, new2), .done)
+        check("and the marks arrive in it",
+              fm.fileExists(atPath: new2.appendingPathComponent("m.json").path))
+
+        // When it cannot be done, it must say so and leave nothing behind,
+        // so the next launch can try again.
+        let old3 = root.appendingPathComponent("OLDNAME/locked", isDirectory: true)
+        try? fm.createDirectory(at: old3, withIntermediateDirectories: true)
+        try? "v".write(to: old3.appendingPathComponent("f.txt"), atomically: true, encoding: .utf8)
+        let shut = root.appendingPathComponent("readonly", isDirectory: true)
+        try? fm.createDirectory(at: shut, withIntermediateDirectories: true)
+        try? fm.setAttributes([.posixPermissions: 0o500], ofItemAtPath: shut.path)
+        let blocked = shut.appendingPathComponent("locked", isDirectory: true)
+        equal("a carry that cannot finish reports failure",
+              LegacyDefaults.carry(old3, blocked), .failed)
+        check("and leaves no half-copied folder behind",
+              !fm.fileExists(atPath: blocked.path) && !fm.fileExists(atPath: blocked.path + ".incoming"))
+        try? fm.setAttributes([.posixPermissions: 0o700], ofItemAtPath: shut.path)
+        equal("the retry, once it is possible, succeeds",
+              LegacyDefaults.carry(old3, blocked), .done)
+        check("and the file is there",
+              fm.fileExists(atPath: blocked.appendingPathComponent("f.txt").path))
+
+        equal("nothing to carry is not a failure",
+              LegacyDefaults.carry(root.appendingPathComponent("NOPE"),
+                                   root.appendingPathComponent("elsewhere")), .nothing)
     }
 
     // MARK: dragging an element out of the tree
@@ -557,7 +629,7 @@ enum SelfCheck {
     private static func checkCSV() {
         section("CSV export")
         let url = URL(fileURLWithPath: NSTemporaryDirectory())
-            .appendingPathComponent("xmleditorx-selfcheck.csv")
+            .appendingPathComponent("xml-macker-selfcheck.csv")
         defer { try? FileManager.default.removeItem(at: url) }
 
         let ok = CSVExport.write(

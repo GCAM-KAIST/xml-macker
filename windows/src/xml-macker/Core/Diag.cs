@@ -14,11 +14,11 @@ namespace XMLMacker.Core;
 ///
 /// Writes are <b>fire-and-forget, non-blocking, and error-swallowing</b>: callers never block and never see
 /// exceptions. Lines are posted to a single-consumer <see cref="Channel{T}"/> that a dedicated long-lived
-/// background task drains, appending to <c>%TEMP%\xmleditorx.log</c> (the WPF analog of the Swift serial dispatch queue).
+/// background task drains, appending to <c>%TEMP%\xml-macker.log</c> (the WPF analog of the Swift serial dispatch queue).
 /// </summary>
 public static class Diag
 {
-    private static readonly string LogPath = Path.Combine(Path.GetTempPath(), "xmleditorx.log");
+    private static readonly string LogPath = Path.Combine(Path.GetTempPath(), "xml-macker.log");
 
     // UTF-8 without a BOM, the Swift logger writes raw UTF-8 bytes with no preamble.
     private static readonly Encoding Utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);

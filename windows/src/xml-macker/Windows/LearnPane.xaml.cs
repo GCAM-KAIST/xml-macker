@@ -142,8 +142,12 @@ public partial class LearnPane : UserControl
 
         try
         {
+            // LOCAL application data, never roaming: this folder is the browser profile, and it
+            // holds the cookies and session tokens of whichever chat site the user logged into. A
+            // roaming profile is copied to a file server at logoff and pushed to every machine that
+            // account signs into, which is exactly what a logged-in session must not do.
             string udf = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "xml-macker", "WebView2");
             Directory.CreateDirectory(udf);
 
@@ -277,6 +281,15 @@ public partial class LearnPane : UserControl
             return;
         }
 
+        // Type into the chosen chat site and nowhere else. The pane is a real browser with no address
+        // bar, so a link can leave it on some other page; typing part of the document into that page
+        // would hand the file to a site the user never chose. The text is already on the clipboard.
+        if (!IsExpectedSite(core.Source, Chats[_currentChat].Home))
+        {
+            OnStatus?.Invoke($"The pane is not on {chatName} right now, so nothing was typed. The text is copied, or press the reload button to go back to {chatName}.");
+            return;
+        }
+
         string js = InjectTemplate.Replace("{0}", json);
         try
         {
@@ -295,6 +308,24 @@ public partial class LearnPane : UserControl
     }
 
     // ================= theme =================
+
+    /// <summary>
+    /// True when the page currently loaded belongs to the chat site that was chosen: the same host, or a
+    /// subdomain of it, which is what the sign-in pages of these sites use.
+    /// </summary>
+    private static bool IsExpectedSite(string? current, string home)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(current)) return false;
+            string host = new Uri(current).Host;
+            string want = new Uri(home).Host;
+            if (want.StartsWith("www.", StringComparison.OrdinalIgnoreCase)) want = want[4..];
+            return host.Equals(want, StringComparison.OrdinalIgnoreCase)
+                || host.EndsWith("." + want, StringComparison.OrdinalIgnoreCase);
+        }
+        catch { return false; }
+    }
 
     /// <summary>Theme hook: only the LEARN title tint is code-owned (the web page owns its own colors).</summary>
     public void RebuildColors()
