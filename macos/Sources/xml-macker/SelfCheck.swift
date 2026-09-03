@@ -3,7 +3,7 @@
 // A self-test that lives inside the shipped app and runs against the
 // exact code that ships:
 //
-//     /Applications/XMLMacker.app/Contents/MacOS/XMLMacker --self-check
+//     /Applications/xml-macker.app/Contents/MacOS/xml-macker --self-check
 //
 // Why it is here and not in Tests/: the XCTest suite in Tests/ cannot run
 // on a Mac that has only the Command Line Tools, because XCTest ships
