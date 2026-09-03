@@ -1,0 +1,188 @@
+<Window x:Class="XMLMacker.Charts.ChartPopoutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:charts="clr-namespace:XMLMacker.Charts"
+        Title="Chart"
+        Width="840"
+        Height="480"
+        MinWidth="480"
+        MinHeight="360"
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="CanResize"
+        Background="{DynamicResource XM.bgDeep}"
+        WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/xml-macker;component/Charts/GlassPillButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <!-- The chart content stays themed while the outer frame uses the native Windows title bar. -->
+    <Border x:Name="Root">
+        <Grid Margin="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" MinHeight="300" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!--  Toolbar  -->
+            <Grid x:Name="Toolbar"
+                  Grid.Row="0"
+                  Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock x:Name="TitleLabel"
+                               Foreground="{DynamicResource XM.text}"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="PathLabel"
+                               Margin="0,1,0,0"
+                               Foreground="{DynamicResource XM.text}"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <ToggleButton x:Name="BuildBtn"
+                                  Content="Build"
+                                  Margin="0,0,8,0"
+                                  Style="{StaticResource XM.GlassPillToggle}"
+                                  Checked="BuildBtn_Toggled"
+                                  Unchecked="BuildBtn_Toggled" />
+                    <ToggleButton x:Name="LabelsBtn"
+                                  Content="Labels"
+                                  Margin="0,0,8,0"
+                                  Style="{StaticResource XM.GlassPillToggle}"
+                                  Checked="LabelsBtn_Toggled"
+                                  Unchecked="LabelsBtn_Toggled" />
+                    <ToggleButton x:Name="TableBtn"
+                                  Content="Table"
+                                  Margin="0,0,8,0"
+                                  Style="{StaticResource XM.GlassPillToggle}"
+                                  Checked="TableBtn_Toggled"
+                                  Unchecked="TableBtn_Toggled" />
+                    <Button x:Name="SaveBtn"
+                            Content="Save Image…"
+                            Margin="0,0,8,0"
+                            Style="{StaticResource XM.GlassPillButton}"
+                            Click="SaveBtn_Click" />
+                    <Button x:Name="CopyBtn"
+                            Content="Copy"
+                            Margin="0,0,8,0"
+                            Style="{StaticResource XM.GlassPillButton}"
+                            Click="CopyBtn_Click" />
+                    <Button x:Name="CsvBtn"
+                            Content="Export CSV…"
+                            Margin="0"
+                            Style="{StaticResource XM.GlassPillButton}"
+                            Click="CsvBtn_Click" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Whole-file chart builder: a scrollable path row plus value and navigation controls. -->
+            <Border x:Name="BuilderBar"
+                    Grid.Row="1"
+                    Height="0"
+                    Margin="0,0,0,0"
+                    CornerRadius="10"
+                    BorderBrush="{DynamicResource XM.hairline}"
+                    BorderThickness="0.5"
+                    Visibility="Collapsed">
+                <Grid Margin="10,6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <ScrollViewer Grid.Row="0"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Disabled">
+                        <StackPanel x:Name="PathStack" Orientation="Horizontal" />
+                    </ScrollViewer>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0">
+                        <TextBlock x:Name="ValueCaption" Text="Value" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource XM.text3}" />
+                        <ComboBox x:Name="ValuePopup" MinWidth="140" MaxWidth="240" Margin="8,0"
+                                  SelectionChanged="ValuePopup_SelectionChanged" />
+                        <ToggleButton x:Name="FollowTreeBtn" Content="Follow tree" IsChecked="True"
+                                      Margin="0,0,8,0" Style="{StaticResource XM.GlassPillToggle}" />
+                        <Button x:Name="RevealBtn" Content="Show in Tree"
+                                Margin="0,0,8,0" Style="{StaticResource XM.GlassPillButton}"
+                                Click="RevealBtn_Click" />
+                        <TextBlock x:Name="BuilderNote" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource XM.text3}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  Chart card  -->
+            <Border x:Name="ChartCard"
+                    Grid.Row="2"
+                    CornerRadius="14"
+                    BorderBrush="{DynamicResource XM.hairline}"
+                    BorderThickness="0.5">
+                <ScrollViewer x:Name="ChartScroll"
+                              Margin="4"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Disabled"
+                              HorizontalContentAlignment="Stretch"
+                              VerticalContentAlignment="Stretch"
+                              CanContentScroll="False"
+                              PanningMode="HorizontalOnly">
+                    <!--  Stretch + MinWidth: layout supplies the width on every pass (maximize, restore,
+                          drag, DPI change, scrollbar appearing), so the chart can never lag the window.  -->
+                    <charts:TrendView x:Name="Chart"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch" />
+                </ScrollViewer>
+            </Border>
+
+            <!--  Table card (height toggled 0 / 240; window grows downward)  -->
+            <Border x:Name="TableCard"
+                    Grid.Row="3"
+                    Height="0"
+                    Margin="0,10,0,0"
+                    CornerRadius="14"
+                    BorderBrush="{DynamicResource XM.hairline}"
+                    BorderThickness="0.5">
+                <DataGrid x:Name="DataTable"
+                          Margin="4"
+                          AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          CanUserResizeRows="False"
+                          RowHeight="22"
+                          Background="Transparent"
+                          RowBackground="Transparent"
+                          AlternatingRowBackground="Transparent"
+                          BorderThickness="0"
+                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{DynamicResource XM.hairline}"
+                          VerticalGridLinesBrush="{DynamicResource XM.hairline}"
+                          Foreground="{DynamicResource XM.text}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Label"
+                                            Binding="{Binding Label}"
+                                            Width="260"
+                                            MinWidth="100" />
+                        <DataGridTextColumn Header="Value"
+                                            Binding="{Binding ValueText}"
+                                            Width="180"
+                                            MinWidth="80" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

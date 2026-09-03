@@ -1,4 +1,4 @@
-# XMLEDITORX
+# xml-macker
 
 An editor for very large XML files, built for
 [GCAM](https://github.com/JGCRI/gcam-core) model files: hundreds of
@@ -64,13 +64,13 @@ same features.
 Download the build for your system from
 [Releases](../../releases).
 
-**macOS.** Unzip and drag `XMLEDITORX.app` into Applications. On the
+**macOS.** Unzip and drag `xml-macker.app` into Applications. On the
 first launch macOS warns about an unidentified developer: open
 **System Settings, Privacy and Security**, click **Open Anyway** and
 confirm.
 
-**Windows.** Run `XMLEDITORX-Setup.exe` for a Start-menu entry and an
-uninstaller, or take the portable `XMLEDITORX.exe` and run it from
+**Windows.** Run `xml-macker-setup.exe` for a Start-menu entry and an
+uninstaller, or take the portable `xml-macker.exe` and run it from
 anywhere. Windows SmartScreen may warn about an unrecognised
 publisher: choose **More info**, then **Run anyway**.
 
@@ -82,18 +82,18 @@ publisher: choose **More info**, then **Run anyway**.
 ```bash
 cd macos
 ./build-app.sh release     # SwiftPM build, then the .app bundle
-open dist/XMLEDITORX.app
+open dist/xml-macker.app
 ```
 
 **Windows**, needing the .NET 8 SDK:
 
 ```bat
 cd windows
-dotnet build XMLEDITORX.sln -c Release
-dotnet run --project src\XMLEDITORX\XMLEDITORX.csproj -c Release
+dotnet build xml-macker.sln -c Release
+dotnet run --project src\xml-macker\xml-macker.csproj -c Release
 ```
 
-The installer is built from `windows/installer/XMLEDITORX.iss` with
+The installer is built from `windows/installer/xml-macker.iss` with
 [Inno Setup 6](https://jrsoftware.org/isinfo.php).
 
 ## Checking a build
@@ -108,10 +108,10 @@ cd macos && ./tools/check.sh --ui   # the above, plus a scripted pass over the i
 
 ```bat
 cd windows
-dotnet run --project src\XMLEDITORX.Tests\XMLEDITORX.Tests.csproj -c Release
+dotnet run --project src\xml-macker-tests\xml-macker-tests.csproj -c Release
 ```
 
-On macOS, `XMLEDITORX --self-check` runs the assertions alone and exits.
+On macOS, `dist/xml-macker.app/Contents/MacOS/xml-macker --self-check` runs the assertions alone and exits.
 
 ## License
 

@@ -1,0 +1,101 @@
+<UserControl x:Class="XMLMacker.Windows.LearnPane"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <UserControl.Resources>
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource XM.text2}" />
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PillButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource XM.text}" />
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Padding" Value="8,2" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="6"
+                                Background="{DynamicResource XM.panel}"
+                                BorderBrush="{DynamicResource XM.hairlineS}" BorderThickness="0.5"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.85" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource XM.bg}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Top row -->
+        <Grid Grid.Row="0" Margin="10,6,10,0" Height="24">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <TextBlock x:Name="TitleLabel" Text="LEARN" VerticalAlignment="Center"
+                           FontFamily="Segoe UI" FontSize="10" Foreground="{DynamicResource XM.text3}" />
+                <TextBlock Text="Choose LLM:" Margin="10,0,0,0" VerticalAlignment="Center"
+                           FontFamily="Segoe UI" FontSize="11" Foreground="{DynamicResource XM.text2}" />
+                <ComboBox x:Name="Picker" Margin="4,0,0,0" MaxWidth="150" Width="130"
+                          VerticalAlignment="Center" FontFamily="Segoe UI" FontSize="11" />
+                <Button x:Name="BackBtn" Style="{StaticResource IconButton}" Margin="12,0,0,0" Content="◀" ToolTip="Back" />
+                <Button x:Name="ForwardBtn" Style="{StaticResource IconButton}" Margin="8,0,0,0" Content="▶" ToolTip="Forward" />
+                <Button x:Name="ReloadBtn" Style="{StaticResource IconButton}" Margin="8,0,0,0" Content="⟳" ToolTip="Reload the page" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button x:Name="ZoomOutBtn" Style="{StaticResource IconButton}" Content="−" ToolTip="Make the page smaller" />
+                <Button x:Name="ZoomInBtn" Style="{StaticResource IconButton}" Margin="8,0,0,0" Content="＋" ToolTip="Make the page bigger" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Second row -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,6,10,0">
+            <Button x:Name="DefineSelectionBtn" Style="{StaticResource PillButton}" Content="✨ Selection"
+                    ToolTip="Type the highlighted source text into the chat (nothing is sent until you press Enter)" />
+            <Button x:Name="DefineElementBtn" Style="{StaticResource PillButton}" Margin="8,0,0,0" Content="✨ Element"
+                    ToolTip="Type the selected tree element's XML into the chat" />
+            <Button x:Name="OpenFolderBtn" Style="{StaticResource PillButton}" Margin="8,0,0,0" Content="📁 Folder"
+                    ToolTip="Show the open file in File Explorer, so you can drag the file into the chat" />
+            <Button x:Name="CopyFileBtn" Style="{StaticResource PillButton}" Margin="8,0,0,0" Content="Copy File"
+                    ToolTip="Copy the whole file that is open in the source pane, then paste it into the chat with Ctrl+V" />
+        </StackPanel>
+
+        <!-- Web view + fallback -->
+        <Grid Grid.Row="2" Margin="0,8,0,0">
+            <wv2:WebView2 x:Name="Web" />
+            <Border x:Name="FallbackPanel" Background="{DynamicResource XM.bgDeep}" Visibility="Collapsed">
+                <TextBlock x:Name="FallbackText" TextWrapping="Wrap" MaxWidth="420"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"
+                           FontFamily="Segoe UI" FontSize="12" Foreground="{DynamicResource XM.text2}"
+                           Text="WebView2 runtime is not installed. Install the Microsoft Edge WebView2 Runtime to use the embedded chat pane." />
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

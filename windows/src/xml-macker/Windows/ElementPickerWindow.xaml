@@ -1,0 +1,118 @@
+<Window x:Class="XMLMacker.Windows.ElementPickerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="440" Height="520"
+        WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        Background="{DynamicResource XM.bg}"
+        Title="Choose an element">
+    <Window.Resources>
+        <Style x:Key="PickButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource XM.text}" />
+            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Padding" Value="14,4" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="MinWidth" Value="80" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" CornerRadius="6"
+                                Background="{DynamicResource XM.panel}"
+                                BorderBrush="{DynamicResource XM.hairlineS}"
+                                BorderThickness="0.5"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefault" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource XM.accent}" />
+                                <Setter Property="Foreground" Value="{DynamicResource XM.bg}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.85" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DiscButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource XM.text3}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Width" Value="14" />
+            <Setter Property="FontSize" Value="9" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{DynamicResource XM.bgDeep}">
+            <ListBox x:Name="TreeList"
+                     Background="Transparent" BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     VirtualizingStackPanel.IsVirtualizing="True"
+                     VirtualizingStackPanel.VirtualizationMode="Recycling"
+                     ScrollViewer.CanContentScroll="True">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border x:Name="rowbd" Background="Transparent" CornerRadius="4" Height="22">
+                                        <ContentPresenter VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="rowbd" Property="Background" Value="{DynamicResource XM.lineHighlight}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Margin="{Binding Indent}">
+                            <Button Style="{StaticResource DiscButton}" Content="{Binding Glyph}" Tag="disc" />
+                            <TextBlock Text="{Binding Label}" VerticalAlignment="Center"
+                                       FontFamily="Cascadia Mono, Consolas" FontSize="11" FontWeight="Medium"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource XM.syntaxTag}" />
+                            <TextBlock Text="{Binding Detail}" VerticalAlignment="Center" Margin="6,0,0,0"
+                                       FontFamily="Cascadia Mono, Consolas" FontSize="10"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource XM.text3}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button x:Name="CancelBtn" Style="{StaticResource PickButton}" Content="Cancel" IsCancel="True" />
+            <Button x:Name="ChooseBtn" Style="{StaticResource PickButton}" Margin="8,0,0,0"
+                    Content="Choose" IsDefault="True" />
+        </StackPanel>
+    </Grid>
+</Window>
