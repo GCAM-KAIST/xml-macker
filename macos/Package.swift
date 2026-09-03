@@ -2,19 +2,19 @@
 import PackageDescription
 
 let package = Package(
-    name: "XMLEDITORX",
+    name: "xml-macker",
     platforms: [
         .macOS(.v13)
     ],
     targets: [
         .executableTarget(
-            name: "XMLEDITORX",
-            path: "Sources/XMLEDITORX"
+            name: "XMLMacker",
+            path: "Sources/xml-macker"
         ),
         .testTarget(
-            name: "XMLEDITORXTests",
-            dependencies: ["XMLEDITORX"],
-            path: "Tests/XMLEDITORXTests"
+            name: "XMLMackerTests",
+            dependencies: ["XMLMacker"],
+            path: "Tests/xml-macker-tests"
         )
     ]
 )

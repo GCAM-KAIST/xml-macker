@@ -1,10 +1,10 @@
--- Pop-out and dock matrix test for XMLEDITORX.
+-- Pop-out and dock matrix test for xml-macker.
 -- Run:  osascript tools/popout-matrix-test.applescript
 -- Needs: the app running with a file open, and Accessibility permission
 -- for the terminal. Prints scroll-area sizes before and after each cycle.
 on findAndPress(descWanted)
   tell application "System Events"
-    tell process "XMLEDITORX"
+    tell process "xml-macker"
       repeat with w in windows
         set els to entire contents of w
         repeat with el in els
@@ -24,7 +24,7 @@ end findAndPress
 on geometry()
   set out to ""
   tell application "System Events"
-    tell process "XMLEDITORX"
+    tell process "xml-macker"
       set out to out & "win=" & (count of windows) & " "
       set els to entire contents of window 1
       repeat with el in els
@@ -48,7 +48,7 @@ on cycle(paneName)
   return paneName & ": popped=" & p & " docked=" & d & " -> " & geometry()
 end cycle
 
-tell application "XMLEDITORX" to activate
+tell application "xml-macker" to activate
 delay 1
 set report to ""
 set modes to {{"Full", "3", {"Tree", "Source", "Subtags", "Hierarchy"}}, {"Edit", "1", {"Tree", "Tree", "Source", "Subtags"}}, {"Inspect", "2", {"Tree", "Tree", "Source"}}}

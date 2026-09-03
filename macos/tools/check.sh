@@ -20,7 +20,7 @@ else
 fi
 
 step "2. Built-in logic checks"
-if ./.build/release/XMLEDITORX --self-check; then
+if ./.build/release/XMLMacker --self-check; then
   echo "self-check: passed"
 else
   echo "self-check: FAILED"; fail=1
@@ -30,19 +30,19 @@ step "3. Element-aware diff on real GCAM files"
 L=/tmp/gcam/transportation_UCD_CORE.xml
 R=/tmp/gcam/transportation_UCD_SSP1.xml
 if [ -f "$L" ] && [ -f "$R" ]; then
-  ./.build/release/XMLEDITORX --diff-check "$L" "$R" || fail=1
+  ./.build/release/XMLMacker --diff-check "$L" "$R" || fail=1
 else
   echo "skipped: put two GCAM files at $L and $R to run this"
 fi
 
 step "4. The app starts and quits"
 ./build-app.sh release >/dev/null 2>&1 || { echo "bundle: FAILED"; fail=1; }
-open -a "$PWD/dist/XMLEDITORX.app" 2>/dev/null
+open -a "$PWD/dist/xml-macker.app" 2>/dev/null
 for _ in $(seq 1 20); do
-  pgrep -x XMLEDITORX >/dev/null && break
+  pgrep -x xml-macker >/dev/null && break
   sleep 1
 done
-if pgrep -x XMLEDITORX >/dev/null; then
+if pgrep -x xml-macker >/dev/null; then
   echo "launch: ok"
 else
   echo "launch: FAILED"; fail=1
@@ -53,7 +53,7 @@ if [ "${1:-}" = "--ui" ]; then
   # The sweep drives the Diff window, which needs two tabs open. Open the
   # same GCAM pair as step 3 and give the big files time to parse.
   if [ -f "$L" ] && [ -f "$R" ]; then
-    open -a "$PWD/dist/XMLEDITORX.app" "$L" "$R" 2>/dev/null
+    open -a "$PWD/dist/xml-macker.app" "$L" "$R" 2>/dev/null
     sleep 45
   fi
   # The script reports each step as text and exits 0 even when a step
@@ -64,7 +64,7 @@ if [ "${1:-}" = "--ui" ]; then
 fi
 
 step "6. Crash reports from the last hour"
-found=$(find ~/Library/Logs/DiagnosticReports -name "XMLEDITORX*" -mmin -60 2>/dev/null)
+found=$(find ~/Library/Logs/DiagnosticReports -name "xml-macker*" -mmin -60 2>/dev/null)
 if [ -n "$found" ]; then
   echo "CRASH REPORTS FOUND:"; echo "$found"; fail=1
 else

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build XMLEDITORX via SwiftPM and wrap the resulting executable in a
+# Build xml-macker via SwiftPM and wrap the resulting executable in a
 # minimal .app bundle so it can be launched like any Mac app.
 #
 # Usage: ./build-app.sh [release|debug]    (default: release)
@@ -19,20 +19,20 @@ else
   BUILD_DIR="$(swift build --show-bin-path)"
 fi
 
-BIN="$BUILD_DIR/XMLEDITORX"
+BIN="$BUILD_DIR/XMLMacker"
 if [[ ! -x "$BIN" ]]; then
   echo "!! build failed: no binary at $BIN" >&2
   exit 1
 fi
 
-APP="$ROOT/dist/XMLEDITORX.app"
+APP="$ROOT/dist/xml-macker.app"
 echo "==> assembling $APP"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources"
 
-cp "$BIN" "$APP/Contents/MacOS/XMLEDITORX"
-cp "$ROOT/Resources/XMLEDITORX.icns" "$APP/Contents/Resources/XMLEDITORX.icns"
+cp "$BIN" "$APP/Contents/MacOS/xml-macker"
+cp "$ROOT/Resources/xml-macker.icns" "$APP/Contents/Resources/xml-macker.icns"
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -40,20 +40,20 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <plist version="1.0">
 <dict>
   <key>CFBundleDevelopmentRegion</key><string>en</string>
-  <key>CFBundleExecutable</key><string>XMLEDITORX</string>
-  <key>CFBundleIdentifier</key><string>com.ahmed.xmleditorx</string>
+  <key>CFBundleExecutable</key><string>xml-macker</string>
+  <key>CFBundleIdentifier</key><string>com.ahmed.xmlmacker</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
-  <key>CFBundleName</key><string>XMLEDITORX</string>
-  <key>CFBundleDisplayName</key><string>XMLEDITORX</string>
-  <key>CFBundleIconFile</key><string>XMLEDITORX.icns</string>
+  <key>CFBundleName</key><string>xml-macker</string>
+  <key>CFBundleDisplayName</key><string>xml-macker</string>
+  <key>CFBundleIconFile</key><string>xml-macker.icns</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>1.0</string>
   <key>CFBundleVersion</key><string>18</string>
   <!--
-    XMLEDITORX edits existing, public formats; it does not own a proprietary
+    xml-macker edits existing, public formats; it does not own a proprietary
     document format.  Use the system UTIs where they exist and import (never
     export) the two vendor-defined XML formats below.  Alternate rank makes
-    XMLEDITORX available in Finder's Open With menu without replacing the
+    xml-macker available in Finder's Open With menu without replacing the
     user's preferred editor/viewer.
   -->
   <key>CFBundleDocumentTypes</key>
@@ -75,7 +75,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     </dict>
     <!--
       Several standards have no stable system UTI on a clean macOS install.
-      A separate extension-based declaration lets Finder offer XMLEDITORX for
+      A separate extension-based declaration lets Finder offer xml-macker for
       those files without inventing an exported UTI that the app does not own.
     -->
     <dict>
