@@ -1,63 +1,53 @@
 # xml-macker
 
-An editor for very large XML files, built for
-[GCAM](https://github.com/JGCRI/gcam-core) model files: hundreds of
-megabytes, millions of lines. It opens what other editors refuse, and
-stays responsive once it has.
+xml-macker is an XML editor built for large xml files and tested on
+[GCAM](https://github.com/JGCRI/gcam-core) input files.
 
-It began as a macOS application and now runs on Windows as well. Both
-versions are in this repository, share the same design and carry the
-same features.
+It is designed to work with XML files containing millions of lines,
+while providing both a normal source editor and tools for navigating
+and editing the XML structure.
+
+Available for macOS and Windows.
 
 | | macOS | Windows |
 |---|---|---|
 | Source | [`macos/`](macos) | [`windows/`](windows) |
-| Built with | Swift 6, AppKit, no dependencies | .NET 8, WPF |
-| Needs | macOS 13 or newer, Apple Silicon | Windows 10 or 11, x64 |
+| Built with | Swift 6, AppKit | .NET 8, WPF |
+| Requires | macOS 13+, Apple Silicon | Windows 10 or 11, x64 |
 
-## What it does
+## Features
 
-- **Huge files, quickly.** A 655 MB, 12.6-million-line file opens in
-  about 20 seconds, and jumping anywhere in it is immediate. Several
-  files in tabs, drag and drop, and "Open With" from the file manager.
-- **Four workspaces.** Simple, Inspect, Full and Learn, one click each.
-- **Six panes.** Tree, Source (a syntax-highlighted editor with a
-  two-lane minimap: the left lane snaps to the elements at your current
-  level, the right moves by line under a magnifier), Subtags, Hierarchy,
-  and a details rail carrying Inspector, Chart, Preview and Errors. Any
-  pane pops out into its own window, and the minimap can be hidden from
-  the small button above it.
-- **Editing that stays in sync.** Change an attribute in the Inspector,
-  in Subtags, in Orbit or in the source itself, and every view follows,
-  with undo.
-- **Live validation.** Well-formedness problems are found as you type,
-  with one-click fixes and a badge on the Errors tab.
-- **Charts.** A chart of the numbers inside the selected element is
-  drawn automatically, and one taken inside a region compares that
-  region's own members rather than jumping to all regions. The chart
-  builder walks the whole file through dropdowns to plot any value at
-  any level, with image and CSV export.
-- **Orbit.** A radial map: the selected element in the centre, its
-  children around it, siblings above, and editing in place.
-- **Diff.** Two files side by side, paired element by element, so the
-  same sector meets the same sector even when the files list them in a
-  different order. Walk the differences by block or line by line, copy
-  either way, and undo the copy. A copy always moves complete elements,
-  so the other file cannot be left broken.
-- **Find and Replace.** Whole-word matching, an element scope, a
-  results list and CSV export, plus a quick search in the toolbar.
-- **Marker.** Take the pen and the pointer becomes a highlighter. Drag
-  over words to paint them in four colours, walk from one mark to the
-  next, and find them still there the next time you open the file.
-- **Learn.** A chat site beside your file: send the selection or the
-  current element with one click, open the file's folder to drag it
-  into the chat, or copy the whole file.
-- **Drag and drop.** Drag the text you selected, or an element straight
-  out of the tree, into the chat page, back into the file at any point
-  as one undoable edit, or into another program entirely.
-- **Comfort.** Six themes, an application zoom plus a separate zoom for
-  the window or pane under the pointer, a first-launch tour, a settings
-  window, untitled documents, and your last files remembered.
+- Open and edit very large XML files, tested on a 13 million line file
+  that opens in about 20 seconds.
+- Open referenced files directly by clicking their paths inside the XML.
+- Browse the XML using both a tree and a syntax-highlighted source
+  editor.
+- Edit elements and attributes while keeping the different views
+  synchronized.
+- Detect XML errors while editing.
+- Search and replace text or values across the file.
+- Compare two XML files with an element-aware Diff view.
+- Plot numerical data from XML elements and export charts or CSV files.
+- Highlight and save important parts of a file with Marker.
+- Use Tree, Subtags, Inspector, Hierarchy, Preview and Orbit views to
+  inspect XML structure.
+- Open multiple files in tabs and use drag and drop.
+- Use the Learn workspace to work with an AI chat beside the XML file.
+
+## Screenshots
+
+The Learn workspace: the tree, the source editor and a chat beside the
+file.
+
+![Learn workspace](screenshots/learn.png)
+
+| Full layout | Orbit |
+|---|---|
+| ![Full layout](screenshots/full-dark.png) | ![Orbit](screenshots/orbit.png) |
+
+Diff, pairing the two files element by element and scoped to one region.
+
+![Diff](screenshots/diff.png)
 
 ## Install
 
